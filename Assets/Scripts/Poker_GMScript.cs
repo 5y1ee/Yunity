@@ -110,7 +110,8 @@ public class Poker_GMScript : MonoBehaviour
         DeckScript.Shuffle();
         DeckScript.Shuffle();
         // GetCard 4번, 애니메이션 실행 
-        DeckScript.num_ani = 4;
+        // DeckScript.num_ani = 4;
+        DeckScript.SpreadCard_num(4);   // 4번 실행
         PlayerScript.GameStart();
         for(int i=0; i<comScripts.Length; i++){
             comScripts[i].GameStart();

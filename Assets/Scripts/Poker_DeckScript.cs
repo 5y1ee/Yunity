@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Poker_DeckScript : MonoBehaviour
 {
-    Animation animation;
     Animator animator;
     public int num_ani=0;
 
@@ -86,34 +85,38 @@ public class Poker_DeckScript : MonoBehaviour
         }
     }
 
-    int num=0;
-    public IEnumerator SpreadCard(){
-        // animator.SetTrigger("spread");
-        num=4;
-        animator.SetInteger("New Int", num);
-        yield return new WaitForSeconds(0.5f);
-        // gameObject.SetActive
-        // animator.ResetTrigger("spread");
-        num--;
-    }
-    public IEnumerator SpreadCard2(int n){
-        Debug.Log("before "+n);
+    // int num=0;
+    // public IEnumerator SpreadCard_4(int n){
+    //     yield return null;
+    //     while(n>=0){
+    //         n--;
+    //         animator.SetInteger("New Int", num);
+    //         yield return new WaitForSeconds(1.6f);
+    //     }
+    //     num--;
+    // }
+    float ani_time = 1.45f;
+    public IEnumerator co_SpreadCard(int n){
         yield return null;
+        Debug.Log("before"+n);
         while(n>=0){
-            Debug.Log("ing "+n);
-            n--;
+            if(n==0){
+                animator.SetInteger("New Int", n);
+                break;
+            }
             animator.SetInteger("New Int", n);
-            yield return new WaitForSeconds(1.5f);
-            Debug.Log("after" + n);
+            n-=1;
+            yield return new WaitForSeconds(ani_time);
+            Debug.Log("after"+n);
         }
-        n=0;
-        Debug.Log("end" + n);
     }
     private void OnMouseDown() {
-        Debug.Log("deck clicked");
-        num=4;
-        StartCoroutine(SpreadCard2(num));
-        // num=0;
-        
+        Debug.Log("Deck clicked");
+        SpreadCard_num(1);        
     }
+
+    public void SpreadCard_num(int n){
+        StartCoroutine(co_SpreadCard(n));
+    }
+
 }

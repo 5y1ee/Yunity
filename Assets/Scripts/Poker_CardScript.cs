@@ -32,7 +32,7 @@ public class Poker_CardScript : MonoBehaviour
         else if(mode==2){
             color.a = 1.0f;
             if(playerSide == PlayerSide.Opponent){ // 일단 상대 카드는 어둡게 (검정으로 안보이게) 설정
-                Debug.Log("처음에 거멓게 설정");
+                // Debug.Log("처음에 거멓게 설정");
                 color.r = 0f;
                 color.g = 0f;
                 color.b = 0f;
