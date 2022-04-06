@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Poker_DeckScript : MonoBehaviour
 {
-    Animation anim;
-    Animator ator;
+    Animation animation;
+    Animator animator;
     public int num_ani=0;
 
     // 카드를 저장할 Sprite 배열, 4*13+1(뒷장카드)
@@ -22,8 +22,7 @@ public class Poker_DeckScript : MonoBehaviour
 //        Debug.Log(cardValues.Length);
         GetCardValues();
 
-        anim = gameObject.GetComponent<Animation>();
-//        anim = gameObject.GetComponent<Poker_AnimationController>();
+        animator = GetComponent<Animator>();
     }
 
     void GetCardValues(){
@@ -69,22 +68,52 @@ public class Poker_DeckScript : MonoBehaviour
 
 
     public int DeckCard(Poker_CardScript CS){
-        StartCoroutine(coAnim());
+
         CS.SetSprite(cardSprites[currentIndex]);
         CS.SetValue(cardValues[currentIndex]);
         currentIndex++;
-        
+
         return CS.GetValue();
     }
 
     IEnumerator coAnim(){
         while(true){
             // Debug.Log(num_ani);
-            anim.Play("Deck_Animation");
+            // animation.Play("Deck_Animation");
             num_ani--;
             yield return new WaitForSecondsRealtime(2.0f);
             if(num_ani<-59)  break;
         }
     }
 
+    int num=0;
+    public IEnumerator SpreadCard(){
+        // animator.SetTrigger("spread");
+        num=4;
+        animator.SetInteger("New Int", num);
+        yield return new WaitForSeconds(0.5f);
+        // gameObject.SetActive
+        // animator.ResetTrigger("spread");
+        num--;
+    }
+    public IEnumerator SpreadCard2(int n){
+        Debug.Log("before "+n);
+        yield return null;
+        while(n>=0){
+            Debug.Log("ing "+n);
+            n--;
+            animator.SetInteger("New Int", n);
+            yield return new WaitForSeconds(1.5f);
+            Debug.Log("after" + n);
+        }
+        n=0;
+        Debug.Log("end" + n);
+    }
+    private void OnMouseDown() {
+        Debug.Log("deck clicked");
+        num=4;
+        StartCoroutine(SpreadCard2(num));
+        // num=0;
+        
+    }
 }

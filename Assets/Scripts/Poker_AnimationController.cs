@@ -3,33 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Poker_AnimationController : MonoBehaviour
-{
+{   // 사실상 지금 쓸모없는 스크립트
     private Animator animator;
-    Animation anim;
+    Animation animation;
     int num = 0;
     private void Awake() {
         animator = GetComponent<Animator>();
-    }
-    void Start()
-    {
-        anim = gameObject.GetComponent<Animation>();
+        // animation = GetComponent<Animation>();
     }
 
-    void Update()
-    {
-        if(num>0){
-//            animator.SetInteger("New Int", num);
-            PlayAnim();
-        }
-    }
 
-    public void PlayAnim(){
-        Debug.Log("Animation");
-        anim.Play("Deck_Animation");
-        num--;
-    }
 
-    private void OnMouseDown() {
-        num = 4;
-    }
 }

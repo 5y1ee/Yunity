@@ -11,10 +11,8 @@ GameObject:
   - component: {fileID: 3630171117026718360}
   - component: {fileID: 6594814284552076657}
   - component: {fileID: 5431428938388554917}
-  - component: {fileID: 619183009545458965}
-  - component: {fileID: 889732471475898067}
-  - component: {fileID: 889732471475898071}
   - component: {fileID: 9097078681917852764}
+  - component: {fileID: 1216297244}
   m_Layer: 0
   m_Name: Deck_Black
   m_TagString: Untagged
@@ -102,6 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f70e42b84761040bca89524e2c3403, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  num_ani: 0
   cardSprites:
   - {fileID: 21300000, guid: 35b1aa564e0affa44b391cd24c36727c, type: 3}
   - {fileID: 21300000, guid: 56b480213ded30244b28e72660856365, type: 3}
@@ -156,53 +155,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 523bc81d4f12c154594d9134dfd85f4f, type: 3}
   - {fileID: 21300000, guid: 0bc0a39dce7af2d40b541dddf4ed86dc, type: 3}
   - {fileID: 21300000, guid: 2c1a6354d1d441c4e97d432a7edc557c, type: 3}
---- !u!114 &619183009545458965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5767258157229545264}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e73fa281fb4009b4498159841855c92e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!111 &889732471475898067
-Animation:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5767258157229545264}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Animation: {fileID: 7400000, guid: 853c7a3e5abb6284594c8413e9467ebc, type: 2}
-  m_Animations:
-  - {fileID: 7400000, guid: 853c7a3e5abb6284594c8413e9467ebc, type: 2}
-  m_WrapMode: 0
-  m_PlayAutomatically: 0
-  m_AnimatePhysics: 0
-  m_CullingType: 0
---- !u!95 &889732471475898071
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5767258157229545264}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d617b3477def3374ba68b612c2e12545, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  cardValues: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!65 &9097078681917852764
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -216,6 +169,25 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.426908, y: 2.1160653, z: 0.2}
   m_Center: {x: 0.09784341, y: -0.0850811, z: 0}
+--- !u!95 &1216297244
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5767258157229545264}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1d46942239791a64b954c51f64161aa5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &6162971378932485685
 GameObject:
   m_ObjectHideFlags: 0
@@ -286,7 +258,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1574586991
   m_SortingLayer: 2
-  m_SortingOrder: -1
+  m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: 35b1aa564e0affa44b391cd24c36727c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
