@@ -9,14 +9,10 @@ public class Poker_ComScript : MonoBehaviour
     public Poker_CardScript[] CardScript;
     
     public GameObject[] hand;
-    public int handIdx = 0;
-    public int Ranking;
-    void Start()
-    {
-        // DeckScript = GameObject.Find("Deck").GetComponent<Poker_DeckScript>();
-        // CardScript = GameObject.Find("Close01").GetComponent<Poker_CardScript>();
+    public int handIdx = 0, Ranking;
+    public Text handText;
 
-    }
+
     public void setAlpha(int mode){
         for(int i=0; i<handIdx; i++){
             CardScript[i].CardScript_Alpha(mode);
@@ -34,7 +30,6 @@ public class Poker_ComScript : MonoBehaviour
         for(int i=0;i<3;i++){
             GetCard();
         }
-
     }
 
 
@@ -46,14 +41,6 @@ public class Poker_ComScript : MonoBehaviour
         handIdx=0;
     }
 
-
-    void Update()
-    {
-        
-    }
-
-
-    public Text handText;
 /*
     public void Rank(){
         string[] Flush = new string[] {"Clover", "Diamond", "Heart", "Spade"};
@@ -137,6 +124,7 @@ public class Poker_ComScript : MonoBehaviour
 
     }
 */
+
     public void Rank(){
         string[] Pictures = new string[] {"Clover", "Diamond", "Heart", "Spade"};
         string[] Numbers = new string[] {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
@@ -146,26 +134,29 @@ public class Poker_ComScript : MonoBehaviour
         List<int> Triplelist = new List<int>();
 
         // "패 카드들" 그림과 숫자 저장할 배열
-        int[] pic = new int[7];
-        int[] num = new int[7];
+        int[] hand_pic = new int[7];
+        int[] hand_num = new int[7];
 
         // 패의 그림, 숫자가 몇 갠지 셀 배열
-        int[] Ary_num = new int[15];    // 0~13 idx=> A~K, 0은 그냥 비워둘것!! + 맨마지막에 "A"를 중복해서 저장. A는 1과 14를 담당.
+        int[] Ary_num = new int[15]; // 1~13 idx=> A~K, 0은 그냥 비워둘것!! + 맨마지막에 "A"를 중복해서 저장. A는 1과 14를 담당.
         int[] Ary_pic = new int[4]; //0~3 idx => clov, dia, heart, spade
 
+        // 패 배열들 초기화
         for(int i=0; i<14; i++)
             Ary_num[i]=0;
         for(int i=0; i<4; i++)
             Ary_pic[i]=0;
 
-        for(int i=0; i<handIdx; i++){
-            pic[i] = CardScript[i].value / 100; // 0,1,2,3
-            num[i] = CardScript[i].value % 100; // 1~13
 
-            Ary_pic[pic[i]] += 1;
-            // if(num[i]>-1) // 카드 버리면 value가 0이라, num이 -1이 되어서 인덱스로 쓸 수 없다.
-            Ary_num[num[i]] += 1;
-            if(num[i]==1)   Ary_num[14]++;  // A는 14도 같이 쳐주자
+        for(int i=0; i<handIdx; i++){
+            // 패 카드들 저장하는 배열 초기화
+            hand_pic[i] = CardScript[i].value / 100; // 0,1,2,3
+            hand_num[i] = CardScript[i].value % 100; // 1~13
+
+            Ary_pic[hand_pic[i]] += 1;
+            Ary_num[hand_num[i]] += 1;
+
+            if(hand_num[i]==1)   Ary_num[14]=Ary_num[1];  // A는 14도 같이 쳐주자
         }
 
         // 패 검사 코드
@@ -249,7 +240,7 @@ public class Poker_ComScript : MonoBehaviour
         else {
             int max=1;
             for(int i=0; i<handIdx; i++)
-                if(max<num[i])  max=num[i];
+                if(max<hand_num[i])  max=hand_num[i];
             handText.text = Numbers[max-1] + " Top";
             Ranking=0+max;
         }

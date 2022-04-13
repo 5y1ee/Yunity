@@ -3,28 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class Poker_GMScript : MonoBehaviour
 {
+    // public static int gameTurn;
+
     // Scripts
     public Poker_DeckScript DeckScript;
     public Poker_PlayerScript PlayerScript;
     public Poker_ComScript[] comScripts;
 
     // Buttons
-    public Button startBtn;
-    public Button halfBtn;
-    public Button callBtn;
-    public Button allinBtn;
-    public Button dieBtn;
-    public Button nextBtn;
+    public Button startBtn, halfBtn, callBtn, allinBtn, dieBtn, nextBtn;
 
-    public Text infoText;
-    public Text handText;
+    public Text infoText, handText, halfText, dieText, turnText;
     public Text[] comhandText; // 버튼들, 텍스트들 다 드래그로 넣어줌
-    public Text halfText;
-    public Text dieText;
 
-    public int gameTurn;    // 초기화 안해주면 0으로 되는듯
+    // public int gameTurn;    // 초기화 안해주면 0으로 되는듯
     void Start()
     {
         startBtn.gameObject.SetActive(true);
@@ -33,8 +28,13 @@ public class Poker_GMScript : MonoBehaviour
         dieBtn.onClick.AddListener(()=>dieClicked());
         
     }
+
+    public int gameTurn;
     void Update()
     {
+        gameTurn = Turn.instance.gameTurn;
+        turnText.text = "Turn : " + gameTurn;
+
         if(gameTurn==0){
             StopAllCoroutines();
 
@@ -81,7 +81,7 @@ public class Poker_GMScript : MonoBehaviour
         }
 
         else if(gameTurn==8){
-            Debug.Log("정산 드갑시다");
+            // Debug.Log("정산 드갑시다");
             PlayerScript.setAlpha(3);
             for(int i=0; i<4; i++)
                 comScripts[i].setAlpha(3);
@@ -111,21 +111,25 @@ public class Poker_GMScript : MonoBehaviour
         DeckScript.Shuffle();
         // GetCard 4번, 애니메이션 실행 
         // DeckScript.num_ani = 4;
-        DeckScript.SpreadCard_num(4);   // 4번 실행
+        DeckScript.SpreadCard_num(4);   // 4번 실행. 애니메이션은 턴이 관리하는게 맞다.!
+
         PlayerScript.GameStart();
         for(int i=0; i<comScripts.Length; i++){
             comScripts[i].GameStart();
         }
 
-        gameTurn=1;
+        Turn.instance.gameTurn=1;
     }
     private void HalfClicked(){
         if(gameTurn>2 && gameTurn<7){    // 3턴부터 눌리도록.
+            DeckScript.SpreadCard_num(1);   // 애니메이션 1번 실행. 애니메이션은 "턴"이 관리해주는게 맞다.
+            // 근데 update 에선 무한 반복되니, 나중엔 isTurnOver 변수를 둬서 턴이 끝나면 gameTurn++, 애니메이션 실행하도록 하고
+            // 지금은 턴 자체가 나만 누르면 진행되는 구조니까 일단 버튼이 애니메이션이랑 gameTurn 변수를 처리하도록 하자.
             PlayerScript.GetCard();
             for(int i=0; i<comScripts.Length; i++)
                 comScripts[i].GetCard();
             // 하프 눌렀으면 턴을 늘려야지. 다이든 뭐든.
-            gameTurn++;
+            Turn.instance.gameTurn++;
         }
     }
     private void dieClicked(){
@@ -145,10 +149,11 @@ public class Poker_GMScript : MonoBehaviour
     }
 
     private void NextClicked(){
+        DeckScript.SpreadCard_num(1);
         for(int i=0; i<comScripts.Length; i++)
             comScripts[i].GetCard();
         // 하프 눌렀으면 턴을 늘려야지. 다이든 뭐든.
-        gameTurn++;    
+        Turn.instance.gameTurn++;    
     }
 
     // isQuit : 첫 턴에서 true가 될 때 까지 무한루프를 돌리는 변수, throw와 show가 완료되면 true로 설정해준다.
@@ -165,7 +170,7 @@ public class Poker_GMScript : MonoBehaviour
             if(isQuit==true){
                 Debug.Log("turn 1 end");
                 PlayerScript.ThrowEnd();
-                gameTurn=2;
+                Turn.instance.gameTurn=2;
                 isQuit=false;
                 break;
             }
@@ -179,7 +184,7 @@ public class Poker_GMScript : MonoBehaviour
             if(isQuit==true){
                 Debug.Log("turn 2 end");
                 PlayerScript.ShowEnd();
-                gameTurn=3;
+                Turn.instance.gameTurn=3;
                 infoText.gameObject.SetActive(false);
                 
                 break;
@@ -216,7 +221,7 @@ public class Poker_GMScript : MonoBehaviour
         }
 
         infoText.text = "Winner is " + Winner;
-        gameTurn=8;
+        Turn.instance.gameTurn=8;
         
     }
 
@@ -232,7 +237,7 @@ public class Poker_GMScript : MonoBehaviour
         infoText.gameObject.SetActive(false);
         startBtn.gameObject.SetActive(true);
 
-        gameTurn=0;
+        Turn.instance.gameTurn=0;
     }
 
 }

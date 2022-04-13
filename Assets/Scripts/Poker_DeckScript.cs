@@ -67,7 +67,7 @@ public class Poker_DeckScript : MonoBehaviour
 
 
     public int DeckCard(Poker_CardScript CS){
-
+        // SpreadCard_num(1);
         CS.SetSprite(cardSprites[currentIndex]);
         CS.SetValue(cardValues[currentIndex]);
         currentIndex++;
