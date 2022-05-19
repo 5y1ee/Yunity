@@ -6,12 +6,15 @@ using UnityEngine.UI;
 
 public class Poker_GMScript : MonoBehaviour
 {
-    // public static int gameTurn;
-
     // Scripts
-    public Poker_DeckScript DeckScript;
-    public Poker_PlayerScript PlayerScript;
-    public Poker_ComScript[] comScripts;
+    [SerializeField]
+    private Poker_DeckScript DeckScript;
+    [SerializeField]
+    private Poker_PlayerScript PlayerScript;
+    [SerializeField]
+    private Poker_ComScript[] comScripts;
+    [SerializeField]
+    private HandRankings rankScripts;
 
     // Buttons
     public Button startBtn, halfBtn, callBtn, allinBtn, dieBtn, nextBtn;
@@ -30,69 +33,75 @@ public class Poker_GMScript : MonoBehaviour
     }
 
     public int gameTurn;
+
     void Update()
     {
-        gameTurn = Turn.instance.gameTurn;
-        turnText.text = "Turn : " + gameTurn;
+        if(gameTurn!=Turn.instance.gameTurn){
+            // DeckCard는 버튼 클릭 시 실행됨! (새 카드 분배), 클릭 시  isDone도 False로 변경.
+            gameTurn = Turn.instance.gameTurn;
+            turnText.text = "Turn : " + gameTurn;
 
-        if(gameTurn==0){
-            StopAllCoroutines();
+            if(gameTurn==0){
+                StopAllCoroutines();
+            }
+            else if(gameTurn==1){    //첫 턴은 버리는 카드 선택
+                StopCoroutine(co_Turn_7());
 
-        }
-        else if(gameTurn==1){    //첫 턴은 버리는 카드 선택
-            StopCoroutine(co_Turn_7());
+                rankScripts.ResetRanking();
+                PlayerScript.setAlpha(2);
+                for(int i=0; i<4; i++)
+                    comScripts[i].setAlpha(2);
 
-            PlayerScript.setAlpha(2);
-            for(int i=0; i<4; i++)
-                comScripts[i].setAlpha(2);
+                // Debug.Log("turn 1..");
+                infoText.gameObject.SetActive(true);
+                infoText.text = "Choose a card to throw away";
+                PlayerScript.ThrowCard();   // hand의 카드 4장의 isThrow=true로 설정
+                StartCoroutine(co_Turn_1());
 
-            // Debug.Log("turn 1..");
-            infoText.gameObject.SetActive(true);
-            infoText.text = "Choose a card to throw away";
-            PlayerScript.ThrowCard();   // hand의 카드 4장의 isThrow=true로 설정
-            StartCoroutine(co_Turn_1());
+            }
+            else if(gameTurn==2){   // 두번째 턴은 보일 카드 선택,
+                StopCoroutine(co_Turn_1());
+                // Debug.Log("turn 2..");
+                infoText.gameObject.SetActive(true);
+                infoText.text = "Choose a card to show";
+                PlayerScript.ShowCard();
+                StartCoroutine(co_Turn_2());
 
-        }
-        else if(gameTurn==2){   // 두번째 턴은 보일 카드 선택,
-            StopCoroutine(co_Turn_1());
-            // Debug.Log("turn 2..");
-            infoText.gameObject.SetActive(true);
-            infoText.text = "Choose a card to show";
-            PlayerScript.ShowCard();
-            StartCoroutine(co_Turn_2());
+            }
+            else if(gameTurn==3){
+                StopCoroutine(co_Turn_2());
+                handText.gameObject.SetActive(true);
+                PlayerScript.setAlpha(1);
+                for(int i=0; i<4; i++)
+                    comScripts[i].setAlpha(1);
+                
+                // gameTurn++;
+            }
 
-        }
-        else if(gameTurn==3){
-            StopCoroutine(co_Turn_2());
-            handText.gameObject.SetActive(true);
-            PlayerScript.setAlpha(1);
-            for(int i=0; i<4; i++)
-                comScripts[i].setAlpha(1);
-            
-            // gameTurn++;
-        }
+            else if(gameTurn==7){
+                PlayerScript.setAlpha(1);
+                for(int i=0; i<4; i++)
+                    comScripts[i].setAlpha(1);
 
-        else if(gameTurn==7){
-            PlayerScript.setAlpha(1);
-            for(int i=0; i<4; i++)
-                comScripts[i].setAlpha(1);
+                StartCoroutine(co_Turn_7());
+            }
 
-            StartCoroutine(co_Turn_7());
-        }
+            else if(gameTurn==8){
+                // Debug.Log("정산 드갑시다");
+                PlayerScript.setAlpha(3);
+                for(int i=0; i<4; i++)
+                    comScripts[i].setAlpha(3);
 
-        else if(gameTurn==8){
-            // Debug.Log("정산 드갑시다");
-            PlayerScript.setAlpha(3);
-            for(int i=0; i<4; i++)
-                comScripts[i].setAlpha(3);
+                StartCoroutine(co_Turn_8());
+            }
 
-            StartCoroutine(co_Turn_8());
-        }
-
-        if(gameTurn>0){
-            PlayerScript.Rank();
-            for(int i=0; i<4; i++)
-                comScripts[i].Rank();
+            if(gameTurn>0){
+                PlayerScript.Rank();
+                for(int i=0; i<4; i++)
+                    comScripts[i].Rank();
+                
+                rankScripts.Proba_Calc();
+            }
         }
     }
 
@@ -152,8 +161,8 @@ public class Poker_GMScript : MonoBehaviour
         DeckScript.SpreadCard_num(1);
         for(int i=0; i<comScripts.Length; i++)
             comScripts[i].GetCard();
-        // 하프 눌렀으면 턴을 늘려야지. 다이든 뭐든.
-        Turn.instance.gameTurn++;    
+            
+        Turn.instance.gameTurn++;
     }
 
     // isQuit : 첫 턴에서 true가 될 때 까지 무한루프를 돌리는 변수, throw와 show가 완료되면 true로 설정해준다.
@@ -175,7 +184,7 @@ public class Poker_GMScript : MonoBehaviour
                 break;
             }
 
-            yield return new WaitForSecondsRealtime(0.5f);
+            yield return new WaitForSeconds(0.5f);
 
         }
     }
@@ -190,7 +199,7 @@ public class Poker_GMScript : MonoBehaviour
                 break;
             }
 
-            yield return new WaitForSecondsRealtime(0.5f);
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -198,7 +207,7 @@ public class Poker_GMScript : MonoBehaviour
         infoText.gameObject.SetActive(true);
         infoText.text = "GameEnd";
         
-        yield return new WaitForSecondsRealtime(2f);
+        yield return new WaitForSeconds(2f);
         // 1초 후에 게임 결과 나오도록
         // 아니면 com들 패 하나씩 오픈되도록,
         int[] playerRank = new int[5];
@@ -227,7 +236,7 @@ public class Poker_GMScript : MonoBehaviour
 
     IEnumerator co_Turn_8(){
         // 여기 애니메이션 추가하던가,
-        yield return new WaitForSecondsRealtime(5f);
+        yield return new WaitForSeconds(5f);
         // die 했을 때 버튼들 active false로 해둔거 살리려고
         halfBtn.gameObject.SetActive(true);
         callBtn.gameObject.SetActive(true);

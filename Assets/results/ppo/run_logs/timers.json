@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1650902353",
+        "python_version": "3.7.13 (default, Mar 28 2022, 08:03:21) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "D:\\anaconda3\\envs\\Yunity\\Scripts\\mlagents-learn",
+        "mlagents_version": "0.29.0",
+        "mlagents_envs_version": "0.29.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "1.7.0+cu110",
+        "numpy_version": "1.21.2",
+        "end_time_seconds": "1650902365"
+    },
+    "total": 11.8378873,
+    "count": 1,
+    "self": 0.005000900000000641,
+    "children": {
+        "run_training.setup": {
+            "total": 0.06527210000000006,
+            "count": 1,
+            "self": 0.06527210000000006
+        },
+        "TrainerController.start_learning": {
+            "total": 11.7676143,
+            "count": 1,
+            "self": 0.0004925000000017832,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 11.767107099999999,
+                    "count": 1,
+                    "self": 11.767107099999999
+                },
+                "trainer_threads": {
+                    "total": 3.999999998782755e-06,
+                    "count": 1,
+                    "self": 3.999999998782755e-06
+                },
+                "TrainerController._save_models": {
+                    "total": 1.0700000000696264e-05,
+                    "count": 1,
+                    "self": 1.0700000000696264e-05
+                }
+            }
+        }
+    }
+}

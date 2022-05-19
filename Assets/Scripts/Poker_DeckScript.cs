@@ -11,7 +11,7 @@ public class Poker_DeckScript : MonoBehaviour
     public Sprite[] cardSprites;
     // 카드 숫자들 처리할 int 형 배열
     public int [] cardValues = new int[53];
-    int currentIndex = 0;   // Deck에서 카드를 빼가는 만큼, 현재 몇 번째 카드를 참조하고 있는지 기록하는 함수
+    public int currentIndex = 0;   // Deck에서 카드를 빼가는 만큼, 현재 몇 번째 카드를 참조하고 있는지 기록하는 함수
    
     void Start()
     {
