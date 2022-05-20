@@ -98,7 +98,7 @@ public class Poker_DeckScript : MonoBehaviour
     float ani_time = 1.45f;
     public IEnumerator co_SpreadCard(int n){
         yield return null;
-        Debug.Log("before"+n);
+        // Debug.Log("before"+n);
         while(n>=0){
             if(n==0){
                 animator.SetInteger("New Int", n);
@@ -107,7 +107,7 @@ public class Poker_DeckScript : MonoBehaviour
             animator.SetInteger("New Int", n);
             n-=1;
             yield return new WaitForSeconds(ani_time);
-            Debug.Log("after"+n);
+            // Debug.Log("after"+n);
         }
     }
     private void OnMouseDown() {

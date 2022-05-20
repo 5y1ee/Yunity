@@ -28,7 +28,7 @@ public class HandRankings : MonoBehaviour
     public void ResetRanking(){
         // totalCards 배열은 idx를 돌면서 새롭게 초기화가 되는데, <List>는 .Add 메소드로 인해 계속해서 추가만 되는 상황 발생.
         ListCards.Clear();
-        
+        gameTurn = Turn.instance.gameTurn;
         for(int i=0; i<totalCards.Length; i++){                         // 0~12,  13~25,  26~38,  39~51
             // 카드 value값 : 1~13까지 숫자, 0, 100, 200, 300번대가 문양 => 1~13, 101~113, 201~213, 301~313 (C.D.H.S)
             totalCards[i] = 100*(i/13) + (i%13) + 1;
@@ -76,53 +76,176 @@ public class HandRankings : MonoBehaviour
         // CountCard
     }
 
+    // 남은카드 : RemainTurns  == 앞으로 받을 수 있는 카드의 수 -> Num_Cards_CanGet
+    // "메이드까지" 필요한 문양 수 : 5-Ary_pic[i] -> remain -> Num_Cards_Required
+    // 전체카드 : ListCards.Count -> n -> Num_Cards_Total
+    // 전체카드 중 "특정문양"의 카드 : ListCards < 100 or ListCards/100 해서 계산 -> r -> Num_Cards_Target
     public void Calculate(){
-        // 3턴부터 시작되는걸로 간주하고 ㄱㄱ
-        // Royal Flush / Straight Flush / Four Card / Full House / Flush / Straight / Triple / Two Pair / One Pair / Top
+        // 3턴부터 시작
         float Pair=0.0f, TwoPair=0.0f,
         Triple=0.0f, Straight=0.0f,
         Flush=0.0f, FullHouse=0.0f,
         FourCard=0.0f, StraightFlush=0.0f;
 
-        // 우선 순열 조합 써서 확률 구하는 방식으로 ㄱㄱㄱㄱㄱ
-        // 플러쉬, 스트레이트, 풀하우스, 포카드, 트리플, 투페어, 원페어 각각 따로 계산.. 해야겠지..?
-        int RemainTurns = 7 - gameTurn;
+        uint RemainTurns = 7 - (uint)gameTurn;
+        uint Num_Cards_Total = (uint)ListCards.Count;
+        uint Num_Cards_Target, Num_Cards_Required;
+        ulong mom = combi((uint)Num_Cards_Total, (uint)RemainTurns);
+        ulong son;
+        float proba;
 
-        // Pair : 12바퀴 돌리면 되것지.
+        // Pair : 13바퀴 돌리면 되것지.
+        for(int i=1; i<14; i++) {
+            proba = 0.0f;
+            if(playerScript.Ary_num[i] + RemainTurns >=2){
+                son = 0;
+                Num_Cards_Target = 0;
+                Num_Cards_Required = 2 - (uint)playerScript.Ary_num[i];
+                for(int k=0; k<Num_Cards_Total; k++){
+                    if(ListCards[k]%100==i)
+                        Num_Cards_Target++;
+                }
+                son = calc_son(Num_Cards_Total, Num_Cards_Required, Num_Cards_Target, RemainTurns);
+
+                proba = (float)son/mom;
+                if(Pair<proba)   Pair=proba;
+            }
+        }
+        text_Pair.text = string.Format("Pair : {0,5}%", Math.Round(Pair*100, 3));
+
+        // Two Pair : Pair가 0개인 경우, Pair가 1개인 경우.. / 일단 1페어일 경우 확률을 따져보자.
+        if(Pair == 1) {
+            int idx=0;
+            for(int i=1; i<14; i++)
+                if(playerScript.Ary_num[i]==2)  idx=i;
+            for(int i=1; i<14; i++) {
+                if(i==idx)  continue;
+                proba = 0.0f;
+                if(playerScript.Ary_num[i] + RemainTurns >= 2) {
+                    son = 0;
+                    Num_Cards_Target = 0;
+                    Num_Cards_Required = 2 - (uint)playerScript.Ary_num[i];
+                    for(int k=0; k<Num_Cards_Total; k++){
+                        if(ListCards[k]%100==i)
+                            Num_Cards_Target++;
+                    }
+                    son = calc_son(Num_Cards_Total, Num_Cards_Required, Num_Cards_Target, RemainTurns);
+                    
+                    proba = (float)son/mom;
+                    if(TwoPair<proba)   TwoPair=proba;
+                }
+            }
+
+        }
+        text_TwoPair.text = string.Format("TwoPair : {0,5}%", Math.Round(TwoPair*100, 3));
+
+        // Triple : Pair에서 Req만 바꾸면 될 듯.
+        for(int i=1; i<14; i++) {
+            proba = 0.0f;
+            if(playerScript.Ary_num[i] + RemainTurns >=3){
+                son = 0;
+                Num_Cards_Target = 0;
+                Num_Cards_Required = 3 - (uint)playerScript.Ary_num[i];
+                for(int k=0; k<Num_Cards_Total; k++){
+                    if(ListCards[k]%100==i)
+                        Num_Cards_Target++;
+                }
+                son = calc_son(Num_Cards_Total, Num_Cards_Required, Num_Cards_Target, RemainTurns);
+
+                proba = (float)son/mom;
+                if(Triple<proba)   Triple=proba;
+            }
+        }
+        text_Triple.text = string.Format("Triple : {0,5}%", Math.Round(Triple*100, 3));
+
+        // Straight : 얘는 어떻게 처리할까.
+        // A 2 3 4 5 6 7 8 9 10 J Q K A
+        ulong tot=0;
+        for(int i=1; i<11; i++) {
+            proba = 0.0f;
+            int cnt=5;
+            int [] Idx = new int[5];
+            for(int x=0; x<5; x++)  Idx[x]=i+x;
+            List<int> Idxx = new List<int>(Idx);
+            // Debug.Log("조회할 리스트 "+string.Join(", ", Idxx));
+            for(int k=0; k<5; k++) {
+                if(playerScript.Ary_num[i+k]>0) {
+                    cnt--;
+                    Idxx.Remove(i+k);
+                }
+            }
+            // Debug.Log("필요한 숫자 : "+string.Join(",", Idxx));            
+            if(RemainTurns - cnt>= 0) {
+                son = 1;
+                Num_Cards_Required = 1;
+                // 1-5-9-13
+                // 1 6 11 || 2 7 12 || 3 8 13 || 1 4 9 14
+                for(int j=0; j<Idxx.Count; j++){
+                    // Idxx[j] : 타겟 값
+                    Num_Cards_Target = 0;
+                    for(int h=0; h<Num_Cards_Total; h++){
+                        if(ListCards[h]%100==Idxx[j])
+                            Num_Cards_Target++;
+                    }
+                    Debug.Log("Idxx[J] : "+Idxx[j]+" Target : "+Num_Cards_Target);
+                    // son += calc_son(Num_Cards_Total, Num_Cards_Required, Num_Cards_Target, RemainTurns-(uint)cnt);
+                    son *= combi(Num_Cards_Target, Num_Cards_Required);
+                    Debug.Log("Son : "+son);
+                    // son *= combi(Num_Cards_Total-(uint)cnt, RemainTurns-(uint)cnt);
+                }
+                son *= combi(Num_Cards_Total-(uint)cnt, RemainTurns-(uint)cnt);
+                tot+=son;
+                Debug.Log("Tot : "+tot+" / mom : "+mom);
+                // proba = (float)tot/mom;
+                // if(Straight<proba)   Straight=proba;
+            }
+        }
+        Straight = (float)tot/mom;
+        
+        text_Straight.text = string.Format("Straight : {0,5}%", Math.Round(Straight*100, 3));
 
         // Flush : 같은 문양 5개
         for(int i=0; i<4; i++) {
-            float proba = 0.0f;
+            proba = 0.0f;
             if(playerScript.Ary_pic[i] + RemainTurns>=5){
-                // 남은카드 : RemainCards  == 앞으로 받을 카드의 수
-                // 필요한 문양 수 : 5-Ary_pic[i]
-                // 전체카드 : ListCards.Count
-                // 전체카드 중 "특정문양"의 카드 : ListCards < 100 or ListCards/100 해서 계산
-                int n = ListCards.Count;
-                uint r = 0;
-                int remain = 5 - playerScript.Ary_pic[i];
-                // uint remain = 5-
-                for(int k=0; k<n; k++){
+                son = 0;
+                Num_Cards_Target = 0;
+                Num_Cards_Required = 5 - (uint)playerScript.Ary_pic[i];
+
+                for(int k=0; k<Num_Cards_Total; k++){
                     if(ListCards[k]/100==i)
-                        r++;
+                        Num_Cards_Target++;
                 }
                 // Debug.Log("n:"+n+", r:"+ r+", remain:"+ remain);
-                ulong son=0;// = combi(r, (uint)remain);
-                for(int j=0; j<=RemainTurns-remain; j++){
-                    son += combi(r, (uint)RemainTurns-(uint)j) * combi((uint)n-r, (uint)j);
-                }
-                ulong mom = combi((uint)n, (uint)RemainTurns);
+                son = calc_son(Num_Cards_Total, Num_Cards_Required, Num_Cards_Target, RemainTurns);
                 // Debug.Log("@@son"+son+", mom"+ mom);
 
                 proba = (float)son/mom;
                 if(Flush<proba)   Flush=proba;
             }
-
         }
-        // Debug.Log("Flush "+Flush);
-        // text_Flush.text = "Flush : {0,5}%"+Flush*100+"%";
         text_Flush.text = string.Format("Flush : {0,5}%", Math.Round(Flush*100, 3));
         
+        // FourCard
+        for(int i=1; i<14; i++) {
+            proba = 0.0f;
+            if(playerScript.Ary_num[i] + RemainTurns >=4){
+                son = 0;
+                Num_Cards_Target = 0;
+                Num_Cards_Required = 4 - (uint)playerScript.Ary_num[i];
+                for(int k=0; k<Num_Cards_Total; k++){
+                    if(ListCards[k]%100==i)
+                        Num_Cards_Target++;
+                }
+                son = calc_son(Num_Cards_Total, Num_Cards_Required, Num_Cards_Target, RemainTurns);
+
+                proba = (float)son/mom;
+                if(FourCard<proba)   FourCard=proba;
+            }
+        }
+        text_FourCard.text = string.Format("FourCard : {0,5}%", Math.Round(FourCard*100, 3));
+
+
         // calculate
     }
 
@@ -132,8 +255,7 @@ public class HandRankings : MonoBehaviour
             if(n-r<r) {
                 r=n-r;
             }
-            ulong cnt=0,  mom=1;
-            ulong son=1;
+            ulong cnt=0, mom=1, son=1;
 
             for(uint i=n-r+1; i<=n; i++) son*=i;
             for(uint k=1; k<=r; k++) mom*=k;
@@ -145,9 +267,12 @@ public class HandRankings : MonoBehaviour
         }
     }
 
-
-
-
+    ulong calc_son(uint Num_Cards_Total, uint Num_Cards_Required, uint Num_Cards_Target, uint RemainTurns){
+        ulong son = 0;
+        for(int k=0; k<=RemainTurns-Num_Cards_Required; k++)
+            son += combi(Num_Cards_Target, RemainTurns-(uint)k) * combi(Num_Cards_Total-Num_Cards_Target, (uint)k);
+        return son;
+    }
 
 
 

@@ -29,22 +29,23 @@ public class Poker_GMScript : MonoBehaviour
         startBtn.onClick.AddListener(()=>StartClicked());
         halfBtn.onClick.AddListener(()=>HalfClicked());
         dieBtn.onClick.AddListener(()=>dieClicked());
-        
+        nextBtn.onClick.AddListener(()=>NextClicked()); // 이거 여기에 켜둬야함!
     }
 
     public int gameTurn;
+    public bool isDie;
 
     void Update()
     {
+        // if(gameTurn==0)
+        //     StopAllCoroutines();
+        
         if(gameTurn!=Turn.instance.gameTurn){
             // DeckCard는 버튼 클릭 시 실행됨! (새 카드 분배), 클릭 시  isDone도 False로 변경.
             gameTurn = Turn.instance.gameTurn;
             turnText.text = "Turn : " + gameTurn;
 
-            if(gameTurn==0){
-                StopAllCoroutines();
-            }
-            else if(gameTurn==1){    //첫 턴은 버리는 카드 선택
+            if(gameTurn==1){    //첫 턴은 버리는 카드 선택
                 StopCoroutine(co_Turn_7());
 
                 rankScripts.ResetRanking();
@@ -52,7 +53,6 @@ public class Poker_GMScript : MonoBehaviour
                 for(int i=0; i<4; i++)
                     comScripts[i].setAlpha(2);
 
-                // Debug.Log("turn 1..");
                 infoText.gameObject.SetActive(true);
                 infoText.text = "Choose a card to throw away";
                 PlayerScript.ThrowCard();   // hand의 카드 4장의 isThrow=true로 설정
@@ -61,7 +61,7 @@ public class Poker_GMScript : MonoBehaviour
             }
             else if(gameTurn==2){   // 두번째 턴은 보일 카드 선택,
                 StopCoroutine(co_Turn_1());
-                // Debug.Log("turn 2..");
+
                 infoText.gameObject.SetActive(true);
                 infoText.text = "Choose a card to show";
                 PlayerScript.ShowCard();
@@ -95,19 +95,23 @@ public class Poker_GMScript : MonoBehaviour
                 StartCoroutine(co_Turn_8());
             }
 
-            if(gameTurn>0){
+            if(gameTurn>0 && gameTurn<8){
                 PlayerScript.Rank();
                 for(int i=0; i<4; i++)
                     comScripts[i].Rank();
                 
-                rankScripts.Proba_Calc();
+                // Player만을 위한 확률 계산이므로,, Die 상태에서는 실행X
+                if(!isDie)
+                    rankScripts.Proba_Calc();
             }
         }
     }
 
     private void StartClicked(){
+        Debug.Log("StartClicked");
         startBtn.gameObject.SetActive(false);
         
+        isDie = false;
         isQuit = false;
 
         // 패 처음에 털어주고,
@@ -130,6 +134,7 @@ public class Poker_GMScript : MonoBehaviour
         Turn.instance.gameTurn=1;
     }
     private void HalfClicked(){
+        Debug.Log("HalfClicked");
         if(gameTurn>2 && gameTurn<7){    // 3턴부터 눌리도록.
             DeckScript.SpreadCard_num(1);   // 애니메이션 1번 실행. 애니메이션은 "턴"이 관리해주는게 맞다.
             // 근데 update 에선 무한 반복되니, 나중엔 isTurnOver 변수를 둬서 턴이 끝나면 gameTurn++, 애니메이션 실행하도록 하고
@@ -142,7 +147,10 @@ public class Poker_GMScript : MonoBehaviour
         }
     }
     private void dieClicked(){
-        if(gameTurn>2 && gameTurn<7){  
+        Debug.Log("DieClicked");
+        if(gameTurn>2 && gameTurn<7){
+            isDie = true;
+
             PlayerScript.setAlpha(0);
 
             halfBtn.gameObject.SetActive(false);
@@ -150,18 +158,18 @@ public class Poker_GMScript : MonoBehaviour
             allinBtn.gameObject.SetActive(false);
             dieBtn.gameObject.SetActive(false);
             nextBtn.gameObject.SetActive(true);
+            // Listener 를 여기에 켜두니까 중복 생성되면 한번 눌러도 2번, 3번씩 불리게 되더라!!
+            // nextBtn.onClick.AddListener(()=>NextClicked());
 
-            nextBtn.onClick.AddListener(()=>NextClicked());
-            // dieText.text = "Next";
-            // dieBtn.GetComponent<Text>().text = "Next";
         }
     }
 
     private void NextClicked(){
+        Debug.Log("NextClicked");
         DeckScript.SpreadCard_num(1);
         for(int i=0; i<comScripts.Length; i++)
             comScripts[i].GetCard();
-            
+
         Turn.instance.gameTurn++;
     }
 
@@ -184,7 +192,7 @@ public class Poker_GMScript : MonoBehaviour
                 break;
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.2f);
 
         }
     }
@@ -198,8 +206,7 @@ public class Poker_GMScript : MonoBehaviour
                 
                 break;
             }
-
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.2f);
         }
     }
 
@@ -231,12 +238,11 @@ public class Poker_GMScript : MonoBehaviour
 
         infoText.text = "Winner is " + Winner;
         Turn.instance.gameTurn=8;
-        
     }
 
     IEnumerator co_Turn_8(){
         // 여기 애니메이션 추가하던가,
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(2.5f);
         // die 했을 때 버튼들 active false로 해둔거 살리려고
         halfBtn.gameObject.SetActive(true);
         callBtn.gameObject.SetActive(true);
@@ -246,7 +252,8 @@ public class Poker_GMScript : MonoBehaviour
         infoText.gameObject.SetActive(false);
         startBtn.gameObject.SetActive(true);
 
-        Turn.instance.gameTurn=0;
+        // Turn.instance.gameTurn=0;
+        StopAllCoroutines();
     }
 
 }
