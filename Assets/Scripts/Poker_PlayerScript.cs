@@ -116,7 +116,7 @@ public class Poker_PlayerScript : MonoBehaviour
             Ary_pic[hand_pic[i]] += 1;
             Ary_num[hand_num[i]] += 1;
 
-            if(hand_num[i]==1)   Ary_num[14]=Ary_num[1];  // A는 14도 같이 쳐주자
+            if(hand_num[i]==1) Ary_num[14]=Ary_num[1];  // A는 14도 같이 쳐주자
         }
 
         // 패 검사 코드
